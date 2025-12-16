@@ -36,7 +36,6 @@ def _():
     })
     w_df['local_time'] = w_df['date'].dt.tz_convert('America/New_York').dt.tz_localize(None)
 
-
     merged_df = pd.merge(ems_df.groupby('incident_hour').size().reset_index(name='call_volume'), w_df, left_on='incident_hour', right_on='local_time', how='inner')
 
 

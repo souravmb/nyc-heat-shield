@@ -1,12 +1,18 @@
 #  NYC Heat-Shield: Operational Resilience System
 A predictive analytics system for NYC Emergency Services that forecasts ambulance demand surges during heatwaves using Machine Learning.
 **Data from:** https://data.cityofnewyork.us/resource/76xm-jjuj.csv
+### Analysis Python file:
+app.py
+
+---
 
 ![Python](https://img.shields.io/badge/Python-3.10%2B-blue?logo=python&logoColor=white)
 ![Framework](https://img.shields.io/badge/Framework-Marimo_Reactive-009688?logo=python&logoColor=white)
 ![Pipeline](https://img.shields.io/badge/Pipeline-ETL_%26_MLOps-blueviolet)
 ![Status](https://img.shields.io/badge/Status-Production_Ready-success)
 ![Accuracy](https://img.shields.io/badge/Model_R²-0.80-2ecc71)
+
+---
 
 ##  Executive Summary
 **The Problem:** Extreme heat events create non-linear surges in emergency medical demand in dense urban environments. Traditional "static rostering" for ambulances fails to account for these rapid fluctuations, leading to increased response times and potential system failure.

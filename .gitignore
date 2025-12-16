@@ -1,0 +1,19 @@
+# --- Python & Environment ---
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+env/
+.env
+
+# --- Data Science ---
+# We do not commit large datasets; the script downloads them.
+*.csv
+*.xlsx
+.cache/
+.cache.sqlite
+
+# --- IDE Settings ---
+.vscode/
+.idea/
+.DS_Store

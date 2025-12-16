@@ -1,0 +1,10 @@
+marimo>=0.1.0
+pandas>=2.0.0
+numpy
+requests
+requests-cache
+retry-requests
+openmeteo-requests
+scikit-learn
+statsmodels
+plotly

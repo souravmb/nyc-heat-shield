@@ -65,7 +65,7 @@ Marimo (Reactive Python Notebooks)
 ## How to Run:
 This project utilizes Marimo, a next-generation reactive notebook that guarantees reproducibility (no hidden state).
 
--**Clone the Repository:**  git clone [https://github.com/YOUR_USERNAME/nyc-heat-shield.git](https://github.com/souravmb/nyc-heat-shield.git) 
+-**Clone the Repository:**  git clone [https://github.com/souravmb/nyc-heat-shield.git](https://github.com/souravmb/nyc-heat-shield.git) 
 cd nyc-heat-shield
 
 -**Install Dependencies:** marimo>=0.1.0,

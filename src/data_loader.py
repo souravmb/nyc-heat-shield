@@ -13,14 +13,16 @@ CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.dirname(CURRENT_DIR)
 CSV_FILENAME = os.path.join(PROJECT_ROOT, "backup_data.csv")
 
-def get_data(query):
+def get_data(query, manual_password=None):
     print(f"Target: {DB_HOST} (User: {DB_USER})")
     
-    print("Type your password (asd251095) below. It will be hidden.")
-    password = getpass.getpass(f"Enter Password: ")
+    if manual_password is not None:
+        password = manual_password
+    else:
+        password = getpass.getpass(f"Enter Password: ")
 
     if not password:
-        print("No password entered. Skipping to offline mode...")
+        print("No password provided. Skipping to offline mode...")
     
     else:
         try:
@@ -47,7 +49,7 @@ def get_data(query):
             error_obj = e.args[0]
             print(f"\nCONNECTION FAILED: {error_obj.message}")
             if "ORA-12514" in str(error_obj):
-                print("TIP: The Service Name 'ORCL' might be wrong. Try changing DB_SERVICE to 'XE'.")
+                print("TIP: Try changing DB_SERVICE to 'XE'.")
             elif "ORA-12170" in str(error_obj):
                 print("TIP: Network Timeout. Are you on the Amrita Wi-Fi?")
             print("Switching to offline mode...")
@@ -62,9 +64,7 @@ def get_data(query):
 
 if __name__ == "__main__":
     TEST_QUERY = "SELECT table_name FROM user_tables"
-    
     df = get_data(TEST_QUERY)
-    
     if not df.empty:
         print("\nSuccess! Tables Found:")
         print(df)

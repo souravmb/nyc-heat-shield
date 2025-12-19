@@ -21,3 +21,6 @@ prophet
 # --- Dashboard & Visualization ---
 marimo>=0.1.0
 plotly
+
+# Oracle
+oracledb

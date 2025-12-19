@@ -1,0 +1,31 @@
+version: 2
+updates:
+  # 1. Maintain Python Dependencies (pip)
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      # Dependabot checks for updates once every 24 hours.
+      # This is the standard maximum frequency for version updates.
+      interval: "daily"
+      time: "04:00" # Runs at 4 AM IST (Before you start work)
+      timezone: "Asia/Kolkata"
+    open-pull-requests-limit: 10
+    # GROUPING: Combines all python updates into ONE Pull Request per day.
+    # This prevents you from getting 50 separate emails.
+    groups:
+      python-dependencies:
+        patterns:
+          - "*"
+
+  # 2. Maintain GitHub Actions (Keep workflows secure)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+      time: "04:00"
+      timezone: "Asia/Kolkata"
+    # Groups all Action updates (checkout, setup-python, etc.) into one PR
+    groups:
+      actions-dependencies:
+        patterns:
+          - "*"

@@ -12,20 +12,19 @@ def _():
     import plotly.express as px
     import sys
     import os
+    import asyncio
 
+    # --- TELEPORTER (For GitHub Pages) ---
     async def mount_db():
         if "pyodide" in sys.modules:
-            # We are in the browser!
             from pyodide.http import pyfetch
-            print(" Downloading Database for Browser...")
+            print("🌐 Downloading Database...")
             response = await pyfetch("nyc_ems.db")
             with open("nyc_ems.db", "wb") as f:
                 f.write(await response.bytes())
-            print(" Database mounted in browser memory.")
+            print("Database mounted.")
     
-    # We must run this download before connecting
-    # (Note: In a normal Python script, this wait happens instantly)
-    import asyncio
+    # Run download if in browser
     try:
         loop = asyncio.get_running_loop()
         if loop.is_running():
@@ -37,27 +36,26 @@ def _():
 
 @app.cell
 def _(mo):
-    mo.md("#  NYC Heat-Shield: Command Center")
+    mo.md("# NYC Heat-Shield: Command Center")
     return
 
 @app.cell
-def _(duckdb, mo, os):
+def _(duckdb, os):
     # Connect to Database
-    # We check if file exists to avoid crashing before the download finishes
     if os.path.exists("nyc_ems.db"):
         con = duckdb.connect("nyc_ems.db", read_only=True)
         status_msg = " Online"
     else:
         con = None
         status_msg = " Loading Data... (Refresh if stuck)"
-    
     return con, status_msg
 
 @app.cell
 def _(con, mo, status_msg):
-    # KPI Stats
+    # --- KPI SECTION ---
     if con is None:
         mo.md(f"**Status:** {status_msg}")
+        latest, load, status, total = None, None, None, None
     else:
         try:
             total = con.execute("SELECT COUNT(*) FROM raw_ems").fetchone()[0]
@@ -76,35 +74,45 @@ def _(con, mo, status_msg):
             ])
         except Exception as e:
             mo.md(f" Data Error: {e}")
+            latest, load, status, total = None, None, None, None
+            
     return latest, load, status, total
 
 @app.cell
 def _(con, go, mo):
-    # Forecast Chart
+    # --- FORECAST CHART SECTION ---
     if con:
         try:
             fc = con.execute("SELECT * FROM forecast_results").df()
             hist = con.execute("SELECT date_trunc('hour', incident_datetime) as ds, count(*) as y FROM raw_ems WHERE incident_datetime > (SELECT MAX(incident_datetime) - INTERVAL 3 DAY FROM raw_ems) GROUP BY ds ORDER BY ds").df()
             
-            fig = go.Figure()
-            fig.add_trace(go.Scatter(x=hist['ds'], y=hist['y'], mode='lines', name='History', line=dict(color='gray')))
-            fig.add_trace(go.Scatter(x=fc['ds'], y=fc['yhat'], mode='lines', name='AI Forecast', line=dict(color='blue')))
-            fig.add_trace(go.Scatter(x=list(fc['ds'])+list(fc['ds'])[::-1], y=list(fc['yhat_upper'])+list(fc['yhat_lower'])[::-1], fill='toself', fillcolor='rgba(0,0,255,0.1)', line=dict(color='rgba(0,0,0,0)'), name='Confidence'))
+            fig_forecast = go.Figure()
+            fig_forecast.add_trace(go.Scatter(x=hist['ds'], y=hist['y'], mode='lines', name='History', line=dict(color='gray')))
+            fig_forecast.add_trace(go.Scatter(x=fc['ds'], y=fc['yhat'], mode='lines', name='AI Forecast', line=dict(color='blue')))
+            fig_forecast.add_trace(go.Scatter(x=list(fc['ds'])+list(fc['ds'])[::-1], y=list(fc['yhat_upper'])+list(fc['yhat_lower'])[::-1], fill='toself', fillcolor='rgba(0,0,255,0.1)', line=dict(color='rgba(0,0,0,0)'), name='Confidence'))
             
-            fig.update_layout(title="7-Day Demand Forecast", xaxis_title="Time", yaxis_title="Ambulance Demand")
-            mo.ui.plotly(fig)
+            fig_forecast.update_layout(title="7-Day Demand Forecast", xaxis_title="Time", yaxis_title="Ambulance Demand")
+            mo.ui.plotly(fig_forecast)
         except:
             mo.md(" Forecast not ready yet.")
-    return fc, fig, hist
+            fig_forecast = None
+            fc, hist = None, None
+    else:
+        fig_forecast, fc, hist = None, None, None
+        
+    return fc, fig_forecast, hist
 
 @app.cell
 def _(con, mo, px):
-    # Map
+    # --- MAP SECTION ---
     if con:
         try:
-            df = con.execute("SELECT borough, count(*) as calls FROM raw_ems GROUP BY borough ORDER BY calls DESC").df()
-            fig = px.bar(df, x="borough", y="calls", color="calls", title="Risk by Borough", color_continuous_scale="Reds")
-            mo.ui.plotly(fig)
+            map_df = con.execute("SELECT borough, count(*) as calls FROM raw_ems GROUP BY borough ORDER BY calls DESC").df()
+            fig_map = px.bar(map_df, x="borough", y="calls", color="calls", title="Risk by Borough", color_continuous_scale="Reds")
+            mo.ui.plotly(fig_map)
         except:
-            pass
-    return df, fig
+            map_df, fig_map = None, None
+    else:
+        map_df, fig_map = None, None
+        
+    return fig_map, map_df

@@ -1,0 +1,46 @@
+name: Update & Deploy NYC Heat-Shield
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: '0 8 * * *'  # Runs automatically every day at 8 AM UTC
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+
+      - name:  Ignite Engine (Fetch Data)
+        run: python src/live_engine.py
+
+      - name:  Train Brain (Generate Forecast)
+        run: python src/forecaster.py
+
+      - name:  Build Marimo Website (WASM)
+        run: |
+          marimo export html-wasm src/dashboard.py --output public
+
+      # This makes the database available to the website
+      - name: Move Database to Public Folder
+        run: mv nyc_ems.db public/
+
+      - name:  Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./public
